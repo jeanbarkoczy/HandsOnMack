@@ -38,11 +38,19 @@ A arquitetura foi desenvolvida para processar e analisar grandes volumes de dado
 ### **4. Camada de Batch (Batch Layer)**
 - **AWS Glue**:
   - Realiza operações de ETL (Extract, Transform, Load) em dados batch.
-  - Organiza e cataloga os dados das camadas S3 no Glue Data Catalog, facilitando o acesso via Athena.
+  - Automatiza o processo de transformação e transferência para o S3 Gold e Redshift.
 
 ---
 
-### **5. Camada de Servicing (Serving Layer)**
+### **5. Camada de Metadados (Metadata Layer)**
+- **AWS Glue Data Catalog**:
+  - Centraliza e organiza os metadados dos dados armazenados no S3.
+  - Facilita a rastreabilidade e as consultas em serviços como Athena e Redshift.
+  - Permite um mapeamento eficiente das camadas de dados (Bronze, Silver, Gold).
+
+---
+
+### **6. Camada de Servicing (Serving Layer)**
 - **API Gateway**: Proporciona uma interface para acesso a dados e análises, permitindo integrações com outros sistemas ou aplicações.
 - **Amazon Athena**:
   - Permite consultas interativas diretamente nos dados armazenados no S3 Gold.
@@ -53,7 +61,7 @@ A arquitetura foi desenvolvida para processar e analisar grandes volumes de dado
 
 ---
 
-### **6. Camada de Monitoramento (Monitoring Layer)**
+### **7. Camada de Monitoramento (Monitoring Layer)**
 - **Amazon CloudWatch**:
   - Monitora e registra logs, métricas e eventos do sistema.
   - Ajuda na identificação de falhas ou gargalos, permitindo uma operação confiável.
@@ -66,7 +74,7 @@ A arquitetura foi desenvolvida para processar e analisar grandes volumes de dado
    - Eventos em tempo real passam pelo Kinesis e são transformados pelo Lambda.
    
 2. **Transformação e Armazenamento**:
-   - Dados batch são processados no EMR e catalogados no Glue, sendo armazenados em S3 Bronze, Silver e Gold.
+   - Dados batch são processados no EMR e catalogados no Glue Data Catalog, sendo armazenados em S3 Bronze, Silver e Gold.
    - Dados finalizados no S3 Gold são formatados em Parquet ou transferidos para o Redshift.
 
 3. **Consulta e Análise**:
@@ -83,7 +91,6 @@ A arquitetura foi desenvolvida para processar e analisar grandes volumes de dado
 - **Escalabilidade**: Suporta grandes volumes de dados e cresce conforme as demandas.
 - **Eficiência**: Otimização de armazenamento em múltiplas camadas (Bronze, Silver, Gold).
 - **Flexibilidade**: Combina fluxos batch e streaming para atender a diferentes necessidades analíticas.
-- **Governança**: Metadados centralizados no Glue garantem organização e rastreabilidade.
+- **Governança**: Metadados centralizados no Glue Data Catalog garantem organização e rastreabilidade.
 
 ---
-
