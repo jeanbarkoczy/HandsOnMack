@@ -1,0 +1,84 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  ci:
+    name: Continuous Integration
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Dependencies
+        run: |
+          echo "Installing dependencies..."
+          pip install -r requirements.txt
+
+      - name: Run Linter
+        run: |
+          echo "Running linter..."
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+      - name: Run Unit Tests
+        run: |
+          echo "Running unit tests..."
+          pytest tests/
+
+  cd:
+    name: Continuous Deployment
+    needs: ci
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Deploy Infrastructure using AWS CLI
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          echo "Deploying infrastructure with AWS CloudFormation..."
+          aws cloudformation deploy \
+            --template-file infrastructure.yaml \
+            --stack-name my-app-stack \
+            --capabilities CAPABILITY_NAMED_IAM
+
+      - name: Deploy Application to EMR
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          echo "Adding steps to EMR cluster..."
+          aws emr add-steps \
+            --cluster-id CLUSTER_ID \
+            --steps Type=CUSTOM_JAR,Name=MyStep,ActionOnFailure=CONTINUE,Jar=s3://path-to-jar/my-job.jar
+
+      - name: Deploy API Gateway and Lambda
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          echo "Deploying API Gateway and Lambda functions..."
+          aws apigatewayv2 import-api --body file://api-definition.json
+
+      - name: Notify Deployment
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          echo "Sending notification about deployment..."
+          aws sns publish \
+            --topic-arn ${{ secrets.SNS_TOPIC_ARN }} \
+            --message "Deployment completed successfully!"
