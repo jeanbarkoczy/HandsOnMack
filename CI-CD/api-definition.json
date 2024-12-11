@@ -1,0 +1,28 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+      "title": "API for HandsOn",
+      "description": "API for project HandsOn",
+      "version": "1.0.0"
+    },
+    "paths": {
+      "/hello": {
+        "get": {
+          "summary": "Returns a greeting",
+          "responses": {
+            "200": {
+              "description": "A greeting message",
+              "content": {
+                "application/json": {
+                  "example": {
+                    "message": "Hello, World!"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
