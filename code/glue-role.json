@@ -1,0 +1,84 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "IAM Role for AWS Glue with S3 access and Secrets Manager privileges",
+  "Resources": {
+    "GluePostgresRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "GlueCustomTrustRole",
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "glue.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "GluePostgresPermissions",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Sid": "S3AccessForRawAdventureWorks",
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:GetObject",
+                    "s3:PutObject"
+                  ],
+                  "Resource": [
+                    "arn:aws:s3:::mba-eng-dados-lakehouses/raw/adventureworks/*"
+                  ]
+                },
+                {
+                  "Sid": "GlueConnections",
+                  "Effect": "Allow",
+                  "Action": [
+                    "glue:CreateConnection",
+                    "glue:GetConnection",
+                    "glue:GetConnections",
+                    "glue:DeleteConnection",
+                    "glue:UpdateConnection"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Sid": "SecretsManagerAccess",
+                  "Effect": "Allow",
+                  "Action": [
+                    "secretsmanager:CreateSecret",
+                    "secretsmanager:PutSecretValue",
+                    "secretsmanager:UpdateSecret",
+                    "secretsmanager:GetSecretValue",
+                    "secretsmanager:DeleteSecret",
+                    "secretsmanager:ListSecrets",
+                    "secretsmanager:TagResource"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Sid": "ServiceLinkedRoleCreation",
+                  "Effect": "Allow",
+                  "Action": [
+                    "iam:CreateServiceLinkedRole"
+                  ],
+                  "Resource": "*",
+                  "Condition": {
+                    "StringEquals": {
+                      "iam:AWSServiceName": "secretsmanager.amazonaws.com"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}
