@@ -1,11 +1,13 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "IAM Role for AWS Glue with S3 access and Secrets Manager privileges",
+  "Description": "IAM Role for AWS Glue with S3 and Secrets Manager",
   "Resources": {
     "GluePostgresRole": {
       "Type": "AWS::IAM::Role",
+      // Adicione DeletionPolicy aqui
+      "DeletionPolicy": "Retain",
       "Properties": {
-        "RoleName": "GlueCustomTrustRole",
+        "RoleName": "GlueCustomRole",
         "AssumeRolePolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [

@@ -1,0 +1,20 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Infrastructure for CI/CD pipeline
+
+Resources:
+  MyS3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: my-app-bucket
+  
+  MyEC2Instance:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-0abcdef1234567890  # Substituir pelo AMI apropriado
+      KeyName: my-key-pair  # Substituir pelo par de chaves apropriado
+      SecurityGroupIds:
+        - sg-0a1b2c3d4e5f67890  # Substituir pelo grupo de segurança apropriado
+      Tags:
+        - Key: Name
+          Value: MyAppInstance
