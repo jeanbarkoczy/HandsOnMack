@@ -65,3 +65,47 @@ INSERT INTO DIM_GRUPO (codgrupo, nome_grupo)
 SELECT DISTINCT cogrupo AS codgrupo, nogrupo AS nome_grupo
 FROM ref_grupos_economicos
 WHERE cogrupo IS NOT NULL AND nogrupo IS NOT NULL;
+
+
+--fato
+-- Criação da Tabela FATO_SEGUROS
+CREATE TABLE FATO_SEGUROS (
+    ID_FATO SERIAL PRIMARY KEY,
+    ID_TEMPO INT REFERENCES DIM_TEMPO(ID_TEMPO),
+    ID_ENTIDADE INT REFERENCES DIM_ENTIDADE(ID_ENTIDADE),
+    ID_RAMO INT REFERENCES DIM_RAMO(ID_RAMO),
+    ID_GRUPO INT REFERENCES DIM_GRUPO(ID_GRUPO),
+    premio_direto NUMERIC,
+    premio_retido NUMERIC,
+    sinistro_direto NUMERIC,
+    sinistro_retido NUMERIC,
+    desp_comercial NUMERIC
+);
+
+
+-- Inserir dados na Tabela FATO_SEGUROS
+INSERT INTO FATO_SEGUROS (
+    ID_TEMPO, ID_ENTIDADE, ID_RAMO, ID_GRUPO, 
+    premio_direto, premio_retido, sinistro_direto, sinistro_retido, desp_comercial
+)
+SELECT 
+    T.ID_TEMPO,
+    E.ID_ENTIDADE,
+    R.ID_RAMO,
+    G.ID_GRUPO,
+    SUM(CAST(REPLACE(S.premio_direto, ',', '.') AS NUMERIC)) AS premio_direto,
+    SUM(CAST(REPLACE(S.premio_retido, ',', '.') AS NUMERIC)) AS premio_retido,
+    SUM(CAST(REPLACE(S.sinistro_direto, ',', '.') AS NUMERIC)) AS sinistro_direto,
+    SUM(CAST(REPLACE(S.sinistro_retido, ',', '.') AS NUMERIC)) AS sinistro_retido,
+    SUM(CAST(REPLACE(S.desp_com, ',', '.') AS NUMERIC)) AS desp_comercial
+FROM ref_ses_seguros S
+    INNER JOIN DIM_TEMPO T ON CAST(S.damesano AS TEXT) = T.damesano
+    INNER JOIN DIM_ENTIDADE E ON CAST(S.coenti AS TEXT) = CAST(E.codenti AS TEXT)
+    INNER JOIN DIM_RAMO R ON CAST(FLOOR(CAST(REPLACE(S.coramo, ',', '.') AS NUMERIC)) AS INTEGER) = R.codramo
+    INNER JOIN DIM_GRUPO G ON CAST(S.cogrupo AS TEXT) = CAST(G.codgrupo AS TEXT)
+WHERE S.premio_direto IS NOT NULL 
+   OR S.premio_retido IS NOT NULL 
+   OR S.sinistro_direto IS NOT NULL
+   OR S.sinistro_retido IS NOT NULL
+   OR S.desp_com IS NOT NULL
+GROUP BY T.ID_TEMPO, E.ID_ENTIDADE, R.ID_RAMO, G.ID_GRUPO;
