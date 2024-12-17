@@ -109,3 +109,89 @@ WHERE S.premio_direto IS NOT NULL
    OR S.sinistro_retido IS NOT NULL
    OR S.desp_com IS NOT NULL
 GROUP BY T.ID_TEMPO, E.ID_ENTIDADE, R.ID_RAMO, G.ID_GRUPO;
+
+
+---- wide table 
+CREATE TABLE SES_SEGUROS_WIDE (
+    diamesano           VARCHAR(7),      -- formato YYYY-MM
+    ano                 INT,             -- Ano
+    mes                 INT,             -- Mês
+    trimestre           INT,             -- Trimestre
+    ID_ENTIDADE         INT,             -- Identificador da entidade
+    codenti             INT,             -- Código da entidade
+    nome_entidade       VARCHAR(255),    -- Nome da entidade
+    ID_GRUPO            INT,             -- Identificador do grupo
+    codgrupo            INT,             -- Código do grupo
+    nome_grupo          VARCHAR(255),    -- Nome do grupo
+    ID_RAMO             INT,             -- Identificador do ramo
+    codramo             INT,             -- Código do ramo
+    nome_ramo           VARCHAR(255),    -- Nome do ramo
+    premio_direto       NUMERIC,         -- Prêmio direto
+    premio_de_seguros   NUMERIC,         -- Prêmio de seguros
+    premio_retido       NUMERIC,         -- Prêmio retido
+    premio_ganho        NUMERIC,         -- Prêmio ganho
+    sinistro_direto     NUMERIC,         -- Sinistro direto
+    sinistro_retido     NUMERIC,         -- Sinistro retido
+    desp_com            NUMERIC,         -- Despesa comercial
+    premio_emitido2     NUMERIC,         -- Prêmio emitido adicional
+    premio_emitido_cap  NUMERIC,         -- Prêmio emitido CAP
+    despesa_resseguros  NUMERIC,         -- Despesa de resseguros
+    sinistro_ocorrido   NUMERIC,         -- Sinistro ocorrido
+    receita_resseguro   NUMERIC,         -- Receita de resseguros
+    sinistros_ocorridos_cap NUMERIC,     -- Sinistros ocorridos CAP
+    recuperacao_sinistros NUMERIC,       -- Recuperação de sinistros
+    rvne                NUMERIC,         -- RVNE
+    conveniodpvat       NUMERIC,         -- Convênio DPVAT
+    consorciosefundos   NUMERIC          -- Consórcios e Fundos
+);
+
+
+
+
+INSERT INTO SES_SEGUROS_WIDE (
+    diamesano, ano, mes, trimestre, 
+    ID_ENTIDADE, codenti, nome_entidade, 
+    ID_GRUPO, codgrupo, nome_grupo, 
+    ID_RAMO, codramo, nome_ramo, 
+    premio_direto, premio_de_seguros, premio_retido, 
+    premio_ganho, sinistro_direto, sinistro_retido, 
+    desp_com, premio_emitido2, premio_emitido_cap, 
+    sinistro_ocorrido, receita_resseguro, 
+    sinistros_ocorridos_cap, recuperacao_sinistros, rvne, 
+    conveniodpvat, consorciosefundos
+)
+SELECT 
+    T.damesano AS diamesano,
+    T.ano,
+    T.mes,
+    CEIL(T.mes / 3.0) AS trimestre, -- Calcula o trimestre
+    E.ID_ENTIDADE,
+    E.codenti,
+    E.nome_entidade,
+    G.ID_GRUPO,
+    G.codgrupo,
+    G.nome_grupo,
+    R.ID_RAMO,
+    R.codramo,
+    R.nome_ramo,
+    F.premio_direto,
+    F.premio_direto AS premio_de_seguros, -- Ajuste duplicado se necessário
+    F.premio_retido,
+    F.premio_retido AS premio_ganho,
+    F.sinistro_direto,
+    F.sinistro_retido,
+    F.desp_comercial AS desp_com,
+    F.premio_direto AS premio_emitido2, -- Valores placeholder
+    F.premio_direto AS premio_emitido_cap,
+    F.sinistro_direto AS sinistro_ocorrido,
+    0 AS receita_resseguro, -- Valores inexistentes assumidos como 0
+    0 AS sinistros_ocorridos_cap, 
+    0 AS recuperacao_sinistros, 
+    0 AS rvne,
+    0 AS conveniodpvat,
+    0 AS consorciosefundos
+FROM FATO_SEGUROS F
+    INNER JOIN DIM_TEMPO T ON F.ID_TEMPO = T.ID_TEMPO
+    INNER JOIN DIM_ENTIDADE E ON F.ID_ENTIDADE = E.ID_ENTIDADE
+    INNER JOIN DIM_GRUPO G ON F.ID_GRUPO = G.ID_GRUPO
+    INNER JOIN DIM_RAMO R ON F.ID_RAMO = R.ID_RAMO;
