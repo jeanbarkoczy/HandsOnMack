@@ -419,7 +419,8 @@ Utilize quando:
 - Cada domínio é responsável elos seus próprios dados, promovendo autonomia e propriedade
 -
 
-> **No Hadoop, o Master coordena e os Slaves executam — tanto no storage quanto no processamento.** 
+> **No Hadoop, o Master coordena e os Slaves executam — tanto no storage quanto no processamento.**
+> A arquitetura master/slave do Hadoop, essencial para big data, utiliza um nó mestre (Master) para gerenciar metadados e coordenar tarefas, enquanto múltiplos nós escravos (Slaves/Workers) armazenam dados (HDFS) e processam computações (MapReduce/YARN) em hardware comum
 
 | Hadoop On-Prem | AWS                 |
 | -------------- | ------------------- |
